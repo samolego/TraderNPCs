@@ -93,9 +93,9 @@ curseforge {
 
     project {
         id = "550916"
-        changelog = "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
+        changelog = ENV.CHANGELOG ?: "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
         releaseType = "release"
-        addGameVersion "${project.minecraft_version}"
+        addGameVersion "1.18-Snapshot"
         addGameVersion "Fabric"
 
         mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}-fabric.jar")) {
@@ -120,7 +120,7 @@ task modrinth(type: TaskModrinthUpload, dependsOn: remapJar) {
     token = ENV.MODRINTH_TOKEN
     projectId = "78ZQG4Et"
     versionNumber = project.minecraft_version + "+" + version + "-fabric"
-    changelog = "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
+    changelog = ENV.CHANGELOG ?: "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
     versionName = "[${project.minecraft_version}] TraderNPCs ${version} [Fabric]"
     releaseType = "release"
 
