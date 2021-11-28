@@ -22,7 +22,10 @@ public class TraderNPCProfession implements TaterzenProfession {
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
-        new TradeGUI(this, (ServerPlayer) player).open();
+        if (!player.isShiftKeyDown()) {
+            new TradeGUI(this, (ServerPlayer) player).open();
+            return InteractionResult.FAIL;
+        }
         return InteractionResult.PASS;
     }
 
@@ -52,7 +55,8 @@ public class TraderNPCProfession implements TaterzenProfession {
 
 
     public void addTrade(ItemStack tradeStack1, ItemStack tradeStack2, ItemStack sellStack) {
-        this.trades.add(new MerchantOffer(tradeStack1, tradeStack2, sellStack, 0, Integer.MAX_VALUE, 0));
+        if (!tradeStack1.isEmpty() || !tradeStack2.isEmpty() || !sellStack.isEmpty())
+            this.trades.add(new MerchantOffer(tradeStack1, tradeStack2, sellStack, Integer.MAX_VALUE, 0, 0));
     }
 
     public MerchantOffers getTrades() {

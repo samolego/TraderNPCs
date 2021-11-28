@@ -1,15 +1,15 @@
 package org.samo_lego.tradernpcs.gui;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import org.jetbrains.annotations.Nullable;
 import org.samo_lego.taterzens.gui.ListItemsGUI;
-import org.samo_lego.taterzens.gui.RedirectedSlot;
+import org.samo_lego.tradernpcs.mixin.MerchantOfferAccessor;
 import org.samo_lego.tradernpcs.profession.TraderNPCProfession;
 
 public class TradeEditGUI extends ListItemsGUI {
@@ -23,7 +23,7 @@ public class TradeEditGUI extends ListItemsGUI {
      * @param player                      the player to server this gui to
      */
     public TradeEditGUI(TraderNPCProfession profession, ServerPlayer player) {
-        super(player, profession.getNpc().getName(), "");
+        super(player, profession.getNpc().getName(), "merchant.trades");
         this.profession = profession;
         this.trades = profession.getTrades();
 
@@ -31,8 +31,15 @@ public class TradeEditGUI extends ListItemsGUI {
         int i = 9;
         do {
             // - 9 as first row is occupied but we want to have index 0 at first element
-            this.setSlotRedirect(i, new RedirectedSlot(this, i - 9));
-            i += 3;
+            this.setSlotRedirect(i, new Slot(this, i - 9, 0, 0));
+            this.setSlotRedirect(i + 1, new Slot(this, i - 8, 0, 0));
+            this.setSlotRedirect(i + 3, new Slot(this, i - 6, 0, 0));
+
+            // Second trade
+            this.setSlotRedirect(i + 5, new Slot(this, i - 4, 0, 0));
+            this.setSlotRedirect(i + 6, new Slot(this, i - 3, 0, 0));
+            this.setSlotRedirect(i + 8, new Slot(this, i - 1, 0, 0));
+            i += 9;
         } while (i < this.getSize());
 
         final ItemStack pane = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
@@ -49,30 +56,31 @@ public class TradeEditGUI extends ListItemsGUI {
             this.setSlot(i + 4, pane);
             this.setSlot(i + 7, tradeFor);
         }
-
-        profession.getTrades().forEach(offer -> {
-            //todo
-        });
     }
 
-    public void editTrade(int tradeIndex, ItemStack replacementStack) {
-        MerchantOffer offer = this.getOffer(tradeIndex);
+    public ItemStack editTrade(int slotIndex, ItemStack replacementStack) {
+        MerchantOffer offer = this.getOffer(slotIndex);
 
         if (offer != null) {
-            int ix = this.getTradeIndex(tradeIndex);
-
-            CompoundTag offerTag = this.trades.get(ix).createTag();
-            System.out.println("Editing " + offerTag);
-            String stackTag = "";
-            switch (ix) {
-                case 0 -> stackTag = "buy";
-                case 1 -> stackTag = "sell";
-                case 3 -> stackTag = "buyB";
+            ItemStack takenStack;
+            if (slotIndex % 9 == 0 || slotIndex % 9 == 5) {
+                takenStack = offer.getBaseCostA();
+                ((MerchantOfferAccessor) offer).setBaseCostA(replacementStack);
+            } else if (slotIndex % 9 == 1 || slotIndex % 9 == 6) {
+                takenStack = offer.getCostB();
+                ((MerchantOfferAccessor) offer).setCostB(replacementStack);
+            } else {
+                takenStack = offer.getResult();
+                ((MerchantOfferAccessor) offer).setResult(replacementStack);
             }
-            offerTag.put(stackTag, replacementStack.save(new CompoundTag()));
 
-            this.trades.set(ix, new MerchantOffer(offerTag));
+            // If all stacks are now empty, this whole trade is empty
+            if (offer.getBaseCostA().isEmpty() && offer.getCostB().isEmpty() && offer.getResult().isEmpty()) {
+                this.trades.remove(offer);
+            }
+            return takenStack;
         }
+        return ItemStack.EMPTY;
     }
 
     @Nullable
@@ -85,12 +93,17 @@ public class TradeEditGUI extends ListItemsGUI {
         return null;
     }
 
-    private int getTradeIndex(int tradeIndex) {
-        int row = tradeIndex / 9;
-        int col = tradeIndex % 9;
+    /**
+     * Gets the index of trade from clicked slot index
+     * @param slotIndex slot index
+     * @return index of trade to get
+     */
+    private int getTradeIndex(int slotIndex) {
+        int row = slotIndex / 9;
+        int col = slotIndex % 9;
         int i = col < 4 ? 0 : 1;
 
-        return row + i;
+        return row * 2 + i;
     }
 
     @Override
@@ -106,33 +119,32 @@ public class TradeEditGUI extends ListItemsGUI {
     @Override
     public ItemStack getItem(int i) {
         i = this.getSlot2MessageIndex(i);
-        MerchantOffer offer = getOffer(i);
+        MerchantOffer offer = this.getOffer(i);
 
         ItemStack stack = ItemStack.EMPTY;
         if (offer != null) {
-            int col = i % 9;
-            int stackIx = col % 5;
-
-            switch (stackIx) {
-                case 0 -> stack = offer.getBaseCostA();
-                case 1 -> stack = offer.getCostB();
-                case 3 -> stack = offer.getResult();
+            if (i % 9 == 0 || i % 9 == 5) {
+                stack = offer.getBaseCostA();
+            } else if (i % 9 == 1 || i % 9 == 6) {
+                stack = offer.getCostB();
+            } else {
+                stack = offer.getResult();
             }
-        }
+
+    }
         return stack;
     }
 
     @Override
     public ItemStack removeItem(int i, int j) {
-        i = this.getSlot2MessageIndex(i);
         return this.removeItemNoUpdate(i);
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int i) {
         i = this.getSlot2MessageIndex(i);
-        if (i < this.trades.size()) {
-            this.editTrade(i, ItemStack.EMPTY);
+        if (this.getTradeIndex(i) < this.trades.size()) {
+            return this.editTrade(i, ItemStack.EMPTY);
         }
         return ItemStack.EMPTY;
     }
@@ -140,10 +152,11 @@ public class TradeEditGUI extends ListItemsGUI {
     @Override
     public void setItem(int i, ItemStack itemStack) {
         i = this.getSlot2MessageIndex(i);
-        if (i < this.trades.size())
+        if (this.getTradeIndex(i) < this.trades.size()) {
             this.editTrade(i, itemStack);
-        else
+        } else {
             this.profession.addTrade(itemStack, ItemStack.EMPTY);
+        }
     }
 
     @Override

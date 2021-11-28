@@ -20,6 +20,7 @@
       "org.samo_lego.tradernpcs.fabric.TradersFabric"
     ]
   },
+  "mixins": ["tradernpcs-common.mixins.json"],
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.17.1"

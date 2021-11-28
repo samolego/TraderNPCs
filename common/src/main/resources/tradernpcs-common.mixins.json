@@ -3,6 +3,7 @@
   "package": "org.samo_lego.tradernpcs.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "MerchantOfferAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
