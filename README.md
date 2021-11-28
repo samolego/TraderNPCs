@@ -1,5 +1,5 @@
 # TraderNPCs
-A Taterzens addon that adds ability to create GUI traders.
+A [Taterzens](https://github.com/samolego/Taterzens) addon that adds ability to create GUI traders.
 
 ## Features
 * simple GUI editing

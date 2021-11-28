@@ -1,11 +1,18 @@
+import com.modrinth.minotaur.TaskModrinthUpload
+
 plugins {
     id "com.github.johnrengelman.shadow" version "7.0.0"
+
+    id 'com.matthewprenger.cursegradle'
+    id "com.modrinth.minotaur"
 }
 
 architectury {
     platformSetupLoomIde()
     fabric()
 }
+
+def ENV = System.getenv();
 
 configurations {
     common
@@ -75,4 +82,50 @@ publishing {
     repositories {
         // Add repositories to publish to here.
     }
+}
+
+
+// from FAPI https://github.com/FabricMC/fabric/blob/1.16/build.gradle
+curseforge {
+    if (ENV.CURSEFORGE_API_KEY) {
+        apiKey = ENV.CURSEFORGE_API_KEY
+    }
+
+    project {
+        id = "550916"
+        changelog = "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
+        releaseType = "release"
+        addGameVersion "${project.minecraft_version}"
+        addGameVersion "Fabric"
+
+        mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}-fabric.jar")) {
+            displayName = "[${project.minecraft_version}] TraderNPCs ${version} [Fabric]"
+        }
+
+        afterEvaluate {
+            uploadTask.dependsOn("remapJar")
+        }
+    }
+
+    options {
+        forgeGradleIntegration = false
+    }
+}
+
+task modrinth(type: TaskModrinthUpload, dependsOn: remapJar) {
+    onlyIf {
+        ENV.MODRINTH_TOKEN
+    }
+
+    token = ENV.MODRINTH_TOKEN
+    projectId = "78ZQG4Et"
+    versionNumber = project.minecraft_version + "+" + version + "-fabric"
+    changelog = "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
+    versionName = "[${project.minecraft_version}] TraderNPCs ${version} [Fabric]"
+    releaseType = "release"
+
+    uploadFile = file("${project.buildDir}/libs/${archivesBaseName}-${version}-fabric.jar")
+
+    addGameVersion("${project.minecraft_version}")
+    addLoader('fabric')
 }
