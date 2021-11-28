@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "tradernpcs",
+  "version": "${version}",
+  "name": "Trader NPCs",
+  "description": "A Taterzens addon that adds ability to create GUI traders.",
+  "authors": [
+    "samo_lego"
+  ],
+  "contact": {
+    "homepage": "https://github.com/samolego/TraderNPCs",
+    "sources": "https://github.com/samolego/TraderNPCs",
+    "issues": "https://github.com/samolego/TraderNPCs/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/tradernpcs/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.samo_lego.tradernpcs.fabric.TradersFabric"
+    ]
+  },
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.17.1"
+  },
+  "recommends": {
+    "taterzens": ">=${taterzens}"
+  }
+}

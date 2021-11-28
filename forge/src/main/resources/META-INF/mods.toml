@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[@FORGE_LOADER_MAJOR@,)"
+issueTrackerURL = "https://github.com/samolego/TraderNPCs/issues"
+license = "MIT"
+
+[[mods]]
+modId = "tradernpcs"
+version = "${version}"
+displayName = "Trader NPCs"
+authors = "samo_lego"
+description = '''
+A Taterzens addon that adds ability to create GUI traders.
+'''
+#logoFile = ""
+
+[[dependencies.tradernpcs]]
+modId = "forge"
+mandatory = true
+versionRange = "[@FORGE_LOADER_MAJOR@,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.tradernpcs]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[@MINECRAFT@,)"
+ordering = "NONE"
+side = "BOTH"
+
+
+[[dependencies.tradernpcs]]
+modId = "taterzens"
+mandatory = true
+versionRange = "[@TATERZENS@,)"
+ordering = "AFTER"
+side = "BOTH"
