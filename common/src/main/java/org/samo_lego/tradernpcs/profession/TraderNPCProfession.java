@@ -18,7 +18,7 @@ import org.samo_lego.tradernpcs.gui.TradeGUI;
 public class TraderNPCProfession implements TaterzenProfession {
     public static final ResourceLocation ID = new ResourceLocation("tradernpcs", "trader");
     private TaterzenNPC npc;
-    public final MerchantOffers trades = new MerchantOffers();
+    private MerchantOffers trades = new MerchantOffers();
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
@@ -31,10 +31,17 @@ public class TraderNPCProfession implements TaterzenProfession {
 
     @Override
     public void readNbt(CompoundTag tag) {
+        if (tag.contains("Trades", 10)) {
+            this.trades = new MerchantOffers(tag.getCompound("Trades"));
+        }
     }
 
     @Override
     public void saveNbt(CompoundTag tag) {
+        MerchantOffers merchantOffers = this.getTrades();
+        if (!merchantOffers.isEmpty()) {
+            tag.put("Trades", merchantOffers.createTag());
+        }
     }
 
     @Override

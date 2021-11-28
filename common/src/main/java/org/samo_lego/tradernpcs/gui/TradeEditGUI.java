@@ -131,7 +131,7 @@ public class TradeEditGUI extends ListItemsGUI {
                 stack = offer.getResult();
             }
 
-    }
+        }
         return stack;
     }
 
