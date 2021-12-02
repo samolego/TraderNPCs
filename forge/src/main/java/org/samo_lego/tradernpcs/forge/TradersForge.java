@@ -1,15 +1,20 @@
 package org.samo_lego.tradernpcs.forge;
 
-import dev.architectury.platform.forge.EventBuses;
-import org.samo_lego.tradernpcs.Traders;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.samo_lego.tradernpcs.Traders;
 
 @Mod(Traders.MOD_ID)
 public class TradersForge {
     public TradersForge() {
-        // Submit our event bus to let architectury register our content on the right time
-        EventBuses.registerModEventBus(Traders.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
+        MinecraftForge.EVENT_BUS.register(this);
         Traders.init();
+    }
+
+    @SubscribeEvent()
+    public void registerCommands(RegisterCommandsEvent event) {
+        Traders.registerCommands(event.getDispatcher(), false);
     }
 }

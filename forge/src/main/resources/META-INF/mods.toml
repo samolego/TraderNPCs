@@ -31,6 +31,6 @@ side = "BOTH"
 [[dependencies.tradernpcs]]
 modId = "taterzens"
 mandatory = true
-versionRange = "[@TATERZENS@,)"
+versionRange = "[${taterzens},)"
 ordering = "AFTER"
 side = "BOTH"
