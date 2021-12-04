@@ -161,6 +161,10 @@ public class TradeEditGUI extends ListItemsGUI {
 
     @Override
     public int getMaxPages() {
-        return 0;
+        if (this.trades == null) {
+            return 0;
+        }
+        // 10 being the amount of possible trades per page
+        return this.trades.size() / 10;
     }
 }
