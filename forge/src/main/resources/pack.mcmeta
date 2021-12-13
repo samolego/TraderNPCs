@@ -1,6 +1,6 @@
 {
   "pack": {
     "description": "Trader NPCs",
-    "pack_format": @MCMETA_FORMAT@
+    "pack_format": 6
   }
 }
