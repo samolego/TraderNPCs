@@ -15,8 +15,10 @@ import org.samo_lego.taterzens.npc.TaterzenNPC;
 import org.samo_lego.tradernpcs.gui.TradeEditGUI;
 import org.samo_lego.tradernpcs.gui.TradeGUI;
 
+import static org.samo_lego.tradernpcs.Traders.MOD_ID;
+
 public class TraderNPCProfession implements TaterzenProfession {
-    public static final ResourceLocation ID = new ResourceLocation("tradernpcs", "trader");
+    public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "trader");
     private TaterzenNPC npc;
     private MerchantOffers trades = new MerchantOffers();
 

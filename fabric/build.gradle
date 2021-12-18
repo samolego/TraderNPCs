@@ -91,7 +91,7 @@ curseforge {
         id = "550916"
         changelog = ENV.CHANGELOG ?: "A changelog can be found at https://github.com/samolego/TraderNPCs/releases/tag/${version}"
         releaseType = "release"
-        addGameVersion "1.18-Snapshot"
+        addGameVersion project.minecraft_version
         addGameVersion "Fabric"
 
         mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}-fabric.jar")) {
