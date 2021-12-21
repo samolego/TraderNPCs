@@ -30,6 +30,11 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
+    // Taterzens
+    // We need this for profession API
+    //modCompileOnly("com.github.samolego.Taterzens:taterzens-fabric:${project.taterzens}")
+    modCompileOnly("com.github.samolego.Taterzens:taterzens-forge:47bd17b207")
+
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
 }
