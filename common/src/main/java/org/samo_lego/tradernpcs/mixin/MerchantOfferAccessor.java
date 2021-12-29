@@ -19,4 +19,8 @@ public interface MerchantOfferAccessor {
     @Mutable
     @Accessor("result")
     void setResult(ItemStack result);
+
+    @Mutable
+    @Accessor("maxUses")
+    void setMaxUses(int maxUses);
 }

@@ -1,9 +1,8 @@
 package org.samo_lego.tradernpcs;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandSourceStack;
 import org.samo_lego.taterzens.api.TaterzensAPI;
 import org.samo_lego.tradernpcs.command.TraderCommand;
+import org.samo_lego.tradernpcs.profession.SurvivalTraderProfession;
 import org.samo_lego.tradernpcs.profession.TraderNPCProfession;
 
 public class Traders {
@@ -11,9 +10,10 @@ public class Traders {
 
     public static void init() {
         TaterzensAPI.registerProfession(TraderNPCProfession.ID, new TraderNPCProfession());
+        TaterzensAPI.registerProfession(SurvivalTraderProfession.ID, new SurvivalTraderProfession());
     }
 
-    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, boolean dedicated) {
-        TraderCommand.register(dispatcher);
+    public static void registerCommands() {
+        TraderCommand.register();
     }
 }

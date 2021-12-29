@@ -15,6 +15,6 @@ public class TradersForge {
 
     @SubscribeEvent()
     public void registerCommands(RegisterCommandsEvent event) {
-        Traders.registerCommands(event.getDispatcher(), false);
+        Traders.registerCommands();
     }
 }

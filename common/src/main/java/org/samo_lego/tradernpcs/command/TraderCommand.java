@@ -1,6 +1,5 @@
 package org.samo_lego.tradernpcs.command;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -19,7 +18,7 @@ import static org.samo_lego.taterzens.util.TextUtil.errorText;
 
 public class TraderCommand {
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register() {
 
         LiteralCommandNode<CommandSourceStack> node = literal("trader")
                 .then(

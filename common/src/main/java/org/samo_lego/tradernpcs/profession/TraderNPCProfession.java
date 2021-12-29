@@ -19,8 +19,8 @@ import static org.samo_lego.tradernpcs.Traders.MOD_ID;
 
 public class TraderNPCProfession implements TaterzenProfession {
     public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "trader");
-    private TaterzenNPC npc;
-    private MerchantOffers trades = new MerchantOffers();
+    protected TaterzenNPC npc;
+    protected MerchantOffers trades = new MerchantOffers();
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
@@ -74,5 +74,14 @@ public class TraderNPCProfession implements TaterzenProfession {
 
     public TaterzenNPC getNpc() {
         return this.npc;
+    }
+
+    /**
+     * Checks whether item can be traded.
+     * @param offer the offer to check.
+     * @return true if the item can be traded, false otherwise (out of stock).
+     */
+    public boolean onTrade(MerchantOffer offer) {
+        return true;
     }
 }

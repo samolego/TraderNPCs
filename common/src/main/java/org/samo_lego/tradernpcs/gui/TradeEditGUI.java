@@ -16,13 +16,14 @@ public class TradeEditGUI extends ListItemsGUI {
 
     private final TraderNPCProfession profession;
     private final MerchantOffers trades;
+    private final int maxPages;
 
     /**
      * Constructs a new layered container gui for the supplied player.
      *
      * @param player                      the player to server this gui to
      */
-    public TradeEditGUI(TraderNPCProfession profession, ServerPlayer player) {
+    public TradeEditGUI(TraderNPCProfession profession, ServerPlayer player, int maxPages) {
         super(player, profession.getNpc().getName(), "merchant.trades");
         this.profession = profession;
         this.trades = profession.getTrades();
@@ -32,13 +33,13 @@ public class TradeEditGUI extends ListItemsGUI {
         do {
             // - 9 as first row is occupied but we want to have index 0 at first element
             this.setSlotRedirect(i, new Slot(this, i - 9, 0, 0));
-            this.setSlotRedirect(i + 1, new Slot(this, i - 8, 0, 0));
-            this.setSlotRedirect(i + 3, new Slot(this, i - 6, 0, 0));
+            this.setSlotRedirect(i + 1, new TradeSlot(this, i - 8));
+            this.setSlotRedirect(i + 3, new TradeSlot(this, i - 6));
 
             // Second trade
-            this.setSlotRedirect(i + 5, new Slot(this, i - 4, 0, 0));
-            this.setSlotRedirect(i + 6, new Slot(this, i - 3, 0, 0));
-            this.setSlotRedirect(i + 8, new Slot(this, i - 1, 0, 0));
+            this.setSlotRedirect(i + 5, new TradeSlot(this, i - 4));
+            this.setSlotRedirect(i + 6, new TradeSlot(this, i - 3));
+            this.setSlotRedirect(i + 8, new TradeSlot(this, i - 1));
             i += 9;
         } while (i < this.getSize());
 
@@ -56,6 +57,12 @@ public class TradeEditGUI extends ListItemsGUI {
             this.setSlot(i + 4, pane);
             this.setSlot(i + 7, tradeFor);
         }
+
+        this.maxPages = maxPages;
+    }
+
+    public TradeEditGUI(TraderNPCProfession profession, ServerPlayer player) {
+        this(profession, player, -1);
     }
 
     public ItemStack editTrade(int slotIndex, ItemStack replacementStack) {
@@ -81,6 +88,10 @@ public class TradeEditGUI extends ListItemsGUI {
             return takenStack;
         }
         return ItemStack.EMPTY;
+    }
+
+    public MerchantOffers getTrades() {
+        return this.trades;
     }
 
     @Nullable
@@ -161,8 +172,8 @@ public class TradeEditGUI extends ListItemsGUI {
 
     @Override
     public int getMaxPages() {
-        if (this.trades == null) {
-            return 0;
+        if (this.trades == null || this.maxPages != -1) {
+            return maxPages;
         }
         // 10 being the amount of possible trades per page
         return this.trades.size() / 10;

@@ -9,6 +9,6 @@ public class TradersFabric implements ModInitializer {
     public void onInitialize() {
         Traders.init();
 
-        CommandRegistrationCallback.EVENT.register(Traders::registerCommands);
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Traders.registerCommands());
     }
 }
