@@ -10,7 +10,7 @@ public class TradeSlot extends Slot {
 
     @Override
     public boolean mayPlace(ItemStack itemStack) {
-        int maxPages = Math.min(((TradeEditGUI) this.container).getMaxPages(), 1);
-        return maxPages * 10 > ((TradeEditGUI) this.container).getTrades().size();
+        int maxPages = ((TradeEditGUI) this.container).getMaxPages() + 1;
+        return maxPages * 10 >= ((TradeEditGUI) this.container).getTrades().size();
     }
 }

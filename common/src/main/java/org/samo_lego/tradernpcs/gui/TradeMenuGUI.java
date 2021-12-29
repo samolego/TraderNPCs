@@ -9,28 +9,28 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.samo_lego.tradernpcs.profession.SurvivalTraderProfession;
 
-public class SurvivalTradeGUI extends SimpleGui {
+public class TradeMenuGUI extends SimpleGui {
 
     /**
      * Selection - whether player wants to edit the trades, set stock, or view the trades.
      * @param profession the profession to edit.
      * @param player the player to construct the gui for.
      */
-    public SurvivalTradeGUI(SurvivalTraderProfession profession, ServerPlayer player) {
+    public TradeMenuGUI(SurvivalTraderProfession profession, ServerPlayer player) {
         super(MenuType.HOPPER, player, false);
 
         // Edit trades
-        ItemStack edit = new ItemStack(Items.TRIDENT);
+        ItemStack edit = new ItemStack(Items.EMERALD);
         edit.setHoverName(new TextComponent("Edit trades"));
         GuiElement editTradesBtn = new GuiElement(edit, (index, type1, action) -> {
             this.close();
-            new TradeEditGUI(profession, player).open();
+            new TradeEditGUI(profession, player, 0).open();
         });
         this.setSlot(0, editTradesBtn);
 
         // Set stock
-        ItemStack stock = new ItemStack(Items.TRIDENT);
-        stock.setHoverName(new TextComponent("$$$"));
+        ItemStack stock = new ItemStack(Items.CHEST);
+        stock.setHoverName(new TextComponent("Set stock & collect earnings"));
         GuiElement setStockBtn = new GuiElement(stock, (index, type1, action) -> {
             this.close();
             new SurvivalStockGUI(profession, player).open();

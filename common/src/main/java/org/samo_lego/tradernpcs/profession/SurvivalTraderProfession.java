@@ -14,8 +14,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.samo_lego.taterzens.api.professions.TaterzenProfession;
 import org.samo_lego.taterzens.npc.TaterzenNPC;
-import org.samo_lego.tradernpcs.gui.SurvivalTradeGUI;
 import org.samo_lego.tradernpcs.gui.TradeGUI;
+import org.samo_lego.tradernpcs.gui.TradeMenuGUI;
 import org.samo_lego.tradernpcs.mixin.MerchantOfferAccessor;
 
 import java.util.ArrayList;
@@ -28,12 +28,13 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
     public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "survival_trader");
     private UUID ownerUUID = null;
     private final ArrayList<ItemStack> inventory = new ArrayList<>(54);  // 54 slots in "double chest" inventory (9 * 6)
+    private boolean itemsAdded = false;
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
         if (player.getUUID().equals(this.ownerUUID)) {
             // It's the owner, so editing is allowed
-            new SurvivalTradeGUI(this, (ServerPlayer) player).open();
+            new TradeMenuGUI(this, (ServerPlayer) player).open();
             return InteractionResult.SUCCESS;
         }
         if (!player.isShiftKeyDown()) {
@@ -47,6 +48,10 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
     public void readNbt(CompoundTag tag) {
         super.readNbt(tag);
         this.ownerUUID = tag.getUUID("OwnerUUID");
+
+        if (this.ownerUUID == null) {
+            this.setOwner();
+        }
     }
 
     @Override
@@ -61,21 +66,36 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
 
     @Override
     public void addTrade(ItemStack tradeStack1, ItemStack tradeStack2, ItemStack sellStack) {
-        if (!tradeStack1.isEmpty() || !tradeStack2.isEmpty() || !sellStack.isEmpty())
-            this.trades.add(new MerchantOffer(tradeStack1, tradeStack2, sellStack, Integer.MAX_VALUE, 0, 0));
+        if (!tradeStack1.isEmpty() || !tradeStack2.isEmpty() || !sellStack.isEmpty()) {
+            this.trades.add(new MerchantOffer(tradeStack1, tradeStack2, sellStack, this.getStockStack(sellStack).getCount(), 0, 0));
+        }
     }
 
     @Override
     public MerchantOffers getTrades() {
-        MerchantOffers trades = new MerchantOffers();
-        for (MerchantOffer offer : this.trades) {
-            // Check stock
-            int maxTrades = this.getStockStack(offer).getCount() / offer.getResult().getCount();
-            ((MerchantOfferAccessor) offer).setMaxUses(maxTrades);
-
-            trades.add(offer);
+        if (this.itemsAdded) {
+            for (MerchantOffer offer : this.trades) {
+                // Check stock
+                ItemStack result = offer.getResult();
+                if (!result.isEmpty()) {
+                    int maxTrades = this.getStockStack(offer).getCount() / result.getCount();
+                    ((MerchantOfferAccessor) offer).setMaxUses(maxTrades);
+                }
+            }
         }
-        return trades;
+        return this.trades;
+    }
+
+    private void setOwner() {
+        final AABB box = this.npc.getBoundingBox().inflate(4.0D);
+        final Iterator<ServerPlayer> playersIt = this.npc.getLevel().getEntitiesOfClass(ServerPlayer.class, box).iterator();
+
+        // Assign player to profession
+        if (playersIt.hasNext()) {
+            ServerPlayer owner = playersIt.next();
+            this.ownerUUID = owner.getUUID();
+            owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your new survival trader!"), this.npc.getUUID());
+        }
     }
 
     @Override
@@ -83,15 +103,7 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         SurvivalTraderProfession prof = new SurvivalTraderProfession();
         prof.npc = taterzen;
 
-        final AABB box = prof.npc.getBoundingBox().inflate(4.0D);
-        final Iterator<ServerPlayer> playersIt = prof.npc.getLevel().getEntitiesOfClass(ServerPlayer.class, box).iterator();
-
-        // Assign player to profession
-        if (playersIt.hasNext()) {
-            ServerPlayer owner = playersIt.next();
-            prof.ownerUUID = owner.getUUID();
-            owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your new survival trader!"), prof.npc.getUUID());
-        }
+        prof.setOwner();
 
         return prof;
     }
@@ -105,13 +117,10 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
             stockStack.shrink(offer.getResult().getCount());
         }
 
-        // Item not found in inventory
         return hasStock;
     }
-    
-    public ItemStack getStockStack(MerchantOffer offer) {
-        ItemStack result = offer.getResult();
 
+    private ItemStack getStockStack(ItemStack result) {
         for (ItemStack stockStack : this.inventory) {
             ItemStack copy = stockStack.copy();
             copy.setCount(result.getCount());
@@ -123,8 +132,17 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         }
         return ItemStack.EMPTY;
     }
+    
+    public ItemStack getStockStack(MerchantOffer offer) {
+        ItemStack result = offer.getResult();
+        return this.getStockStack(result);
+    }
 
     public ArrayList<ItemStack> getInventoryItems() {
         return this.inventory;
+    }
+
+    public void setDirty() {
+        this.itemsAdded = true;
     }
 }

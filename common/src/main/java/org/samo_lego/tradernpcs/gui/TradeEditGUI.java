@@ -16,7 +16,7 @@ public class TradeEditGUI extends ListItemsGUI {
 
     private final TraderNPCProfession profession;
     private final MerchantOffers trades;
-    private final int maxPages;
+    private final int maxAdditionalPages;
 
     /**
      * Constructs a new layered container gui for the supplied player.
@@ -58,7 +58,7 @@ public class TradeEditGUI extends ListItemsGUI {
             this.setSlot(i + 7, tradeFor);
         }
 
-        this.maxPages = maxPages;
+        this.maxAdditionalPages = maxPages;
     }
 
     public TradeEditGUI(TraderNPCProfession profession, ServerPlayer player) {
@@ -172,8 +172,8 @@ public class TradeEditGUI extends ListItemsGUI {
 
     @Override
     public int getMaxPages() {
-        if (this.trades == null || this.maxPages != -1) {
-            return maxPages;
+        if (this.trades == null || this.maxAdditionalPages != -1) {
+            return maxAdditionalPages;
         }
         // 10 being the amount of possible trades per page
         return this.trades.size() / 10;
