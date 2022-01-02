@@ -19,11 +19,14 @@ public class TradeGUI extends MerchantGui {
         this.setTitle(profession.getNpc().getDisplayName());
         this.profession = profession;
 
+        this.setSlotRedirect(2, new FixedTradeSlot(player, profession, merchant, this.merchantInventory));
+
         profession.getTrades().forEach(this::addTrade);
     }
 
     @Override
-    public boolean onTrade(MerchantOffer offer) {
-        return this.profession.onTrade(offer);
+    public void onSelectTrade(MerchantOffer offer) {
+        this.profession.onSelectTrade(offer);
+        this.sendUpdate();
     }
 }

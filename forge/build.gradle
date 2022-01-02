@@ -33,7 +33,7 @@ dependencies {
     // Taterzens
     // We need this for profession API
     //modCompileOnly("com.github.samolego.Taterzens:taterzens-fabric:${project.taterzens}")
-    modCompileOnly("com.github.samolego.Taterzens:taterzens-forge:47bd17b207")
+    modImplementation("com.github.samolego.Taterzens:taterzens-forge:${project.taterzens}")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }

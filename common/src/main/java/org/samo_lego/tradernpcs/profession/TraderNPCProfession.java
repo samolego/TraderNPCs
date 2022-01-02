@@ -10,17 +10,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.Vec3;
-import org.samo_lego.taterzens.api.professions.TaterzenProfession;
+import org.samo_lego.taterzens.api.professions.AbstractProfession;
 import org.samo_lego.taterzens.npc.TaterzenNPC;
 import org.samo_lego.tradernpcs.gui.TradeEditGUI;
 import org.samo_lego.tradernpcs.gui.TradeGUI;
 
 import static org.samo_lego.tradernpcs.Traders.MOD_ID;
 
-public class TraderNPCProfession implements TaterzenProfession {
+public class TraderNPCProfession extends AbstractProfession {
     public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "trader");
-    protected TaterzenNPC npc;
     protected MerchantOffers trades = new MerchantOffers();
+
+    public TraderNPCProfession(TaterzenNPC npc) {
+        super(npc);
+    }
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
@@ -44,13 +47,6 @@ public class TraderNPCProfession implements TaterzenProfession {
         if (!merchantOffers.isEmpty()) {
             tag.put("Trades", merchantOffers.createTag());
         }
-    }
-
-    @Override
-    public TaterzenProfession create(TaterzenNPC taterzen) {
-        TraderNPCProfession profession = new TraderNPCProfession();
-        profession.npc = taterzen;
-        return profession;
     }
 
     public void openEditGui(ServerPlayer player) {
@@ -77,11 +73,16 @@ public class TraderNPCProfession implements TaterzenProfession {
     }
 
     /**
-     * Checks whether item can be traded.
-     * @param offer the offer to check.
-     * @return true if the item can be traded, false otherwise (out of stock).
+     * Called when trade is selected.
+     * @param offer the offer that was selected.
      */
-    public boolean onTrade(MerchantOffer offer) {
-        return true;
+    public void onSelectTrade(MerchantOffer offer) {
+    }
+
+    /**
+     * Calls when item is being traded.
+     * @param tradeOffer the offer being traded.
+     */
+    public void onTrade(MerchantOffer tradeOffer) {
     }
 }

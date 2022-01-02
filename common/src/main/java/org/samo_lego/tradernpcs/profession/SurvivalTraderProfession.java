@@ -12,7 +12,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.samo_lego.taterzens.api.professions.TaterzenProfession;
+import org.jetbrains.annotations.NotNull;
 import org.samo_lego.taterzens.npc.TaterzenNPC;
 import org.samo_lego.tradernpcs.gui.TradeGUI;
 import org.samo_lego.tradernpcs.gui.TradeMenuGUI;
@@ -29,6 +29,11 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
     private UUID ownerUUID = null;
     private final ArrayList<ItemStack> inventory = new ArrayList<>(54);  // 54 slots in "double chest" inventory (9 * 6)
     private boolean itemsAdded = false;
+
+    public SurvivalTraderProfession(TaterzenNPC npc) {
+        super(npc);
+        this.setOwner();
+    }
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
@@ -67,7 +72,17 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
     @Override
     public void addTrade(ItemStack tradeStack1, ItemStack tradeStack2, ItemStack sellStack) {
         if (!tradeStack1.isEmpty() || !tradeStack2.isEmpty() || !sellStack.isEmpty()) {
-            this.trades.add(new MerchantOffer(tradeStack1, tradeStack2, sellStack, this.getStockStack(sellStack).getCount(), 0, 0));
+            int count = Math.max(sellStack.getCount(), 1);
+            this.trades.add(
+                    new MerchantOffer(
+                            tradeStack1.copy(),
+                            tradeStack2.copy(),
+                            sellStack.copy(),
+                            this.getStockStackSize(sellStack) / count,
+                            0,
+                            0
+                    )
+            );
         }
     }
 
@@ -78,10 +93,12 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
                 // Check stock
                 ItemStack result = offer.getResult();
                 if (!result.isEmpty()) {
-                    int maxTrades = this.getStockStack(offer).getCount() / result.getCount();
+                    int maxTrades = this.getStockStackSize(result) / result.getCount();
                     ((MerchantOfferAccessor) offer).setMaxUses(maxTrades);
+                    offer.resetUses();
                 }
             }
+            this.itemsAdded = false;
         }
         return this.trades;
     }
@@ -94,30 +111,57 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         if (playersIt.hasNext()) {
             ServerPlayer owner = playersIt.next();
             this.ownerUUID = owner.getUUID();
+
+            // Todo
             owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your new survival trader!"), this.npc.getUUID());
         }
     }
 
     @Override
-    public TaterzenProfession create(TaterzenNPC taterzen) {
-        SurvivalTraderProfession prof = new SurvivalTraderProfession();
-        prof.npc = taterzen;
+    public void onTrade(MerchantOffer offer) {
+        ItemStack stockStack = this.getStockStack(offer);
+        System.out.println("OnTrade: " + stockStack);
 
-        prof.setOwner();
+        final boolean hasStock = !stockStack.isEmpty();
+        if (hasStock) {
+            stockStack.shrink(offer.getResult().getCount());
+            if (stockStack.isEmpty())
+                this.inventory.remove(stockStack);
 
-        return prof;
+            ItemStack paymentA = offer.getBaseCostA();
+            ItemStack paymentB = offer.getCostB();
+
+            // Add payment to inventory if not empty
+            if (!paymentA.isEmpty())
+                this.inventory.add(paymentA.copy());
+            if (!paymentB.isEmpty())
+                this.inventory.add(paymentB.copy());
+        } else {
+            this.inventory.remove(stockStack);
+        }
     }
 
     @Override
-    public boolean onTrade(MerchantOffer offer) {
-        ItemStack stockStack = this.getStockStack(offer);
+    public void onSelectTrade(MerchantOffer offer) {
+        // Update stock
+        ItemStack result = offer.getResult();
+        int leftover = this.getStockStackSize(result);
+        ((MerchantOfferAccessor) offer).setMaxUses(leftover / result.getCount());
+        offer.resetUses();
+    }
 
-        boolean hasStock = !stockStack.isEmpty();
-        if (hasStock) {
-            stockStack.shrink(offer.getResult().getCount());
+    private int getStockStackSize(ItemStack result) {
+        int size = 0;
+        for (ItemStack stockStack : this.inventory) {
+            ItemStack copy = stockStack.copy();
+            copy.setCount(result.getCount());
+
+            if (ItemStack.matches(copy, result)) {
+                // Item is the same, get stock
+                size += stockStack.getCount();
+            }
         }
-
-        return hasStock;
+        return size;
     }
 
     private ItemStack getStockStack(ItemStack result) {
@@ -133,7 +177,7 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         return ItemStack.EMPTY;
     }
     
-    public ItemStack getStockStack(MerchantOffer offer) {
+    public ItemStack getStockStack(@NotNull MerchantOffer offer) {
         ItemStack result = offer.getResult();
         return this.getStockStack(result);
     }

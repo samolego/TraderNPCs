@@ -9,8 +9,8 @@ public class Traders {
     public static final String MOD_ID = "tradernpcs";
 
     public static void init() {
-        TaterzensAPI.registerProfession(TraderNPCProfession.ID, new TraderNPCProfession());
-        TaterzensAPI.registerProfession(SurvivalTraderProfession.ID, new SurvivalTraderProfession());
+        TaterzensAPI.registerProfession(TraderNPCProfession.ID, TraderNPCProfession::new);
+        TaterzensAPI.registerProfession(SurvivalTraderProfession.ID, SurvivalTraderProfession::new);
     }
 
     public static void registerCommands() {
