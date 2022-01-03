@@ -73,13 +73,6 @@ public class TraderNPCProfession extends AbstractProfession {
     }
 
     /**
-     * Called when trade is selected.
-     * @param offer the offer that was selected.
-     */
-    public void onSelectTrade(MerchantOffer offer) {
-    }
-
-    /**
      * Calls when item is being traded.
      * @param tradeOffer the offer being traded.
      */
@@ -94,5 +87,11 @@ public class TraderNPCProfession extends AbstractProfession {
      */
     public boolean mayTrade(Player player, MerchantOffer offer) {
         return true;
+    }
+
+    /**
+     * Sets that the trades have been changed.
+     */
+    public void setDirty() {
     }
 }

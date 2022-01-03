@@ -158,6 +158,7 @@ public class TradeEditGUI extends ListItemsGUI {
         if (this.getTradeIndex(i) < this.trades.size()) {
             return this.editTrade(i, ItemStack.EMPTY);
         }
+        this.setChanged();
         return ItemStack.EMPTY;
     }
 
@@ -169,6 +170,7 @@ public class TradeEditGUI extends ListItemsGUI {
         } else {
             this.profession.addTrade(itemStack, ItemStack.EMPTY);
         }
+        this.setChanged();
     }
 
     @Override
@@ -178,5 +180,10 @@ public class TradeEditGUI extends ListItemsGUI {
         }
         // 10 being the amount of possible trades per page
         return this.trades.size() / 10;
+    }
+
+    @Override
+    public void setChanged() {
+        this.profession.setDirty();
     }
 }

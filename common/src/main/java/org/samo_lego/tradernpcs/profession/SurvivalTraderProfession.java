@@ -1,6 +1,8 @@
 package org.samo_lego.tradernpcs.profession;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,7 +20,9 @@ import org.samo_lego.tradernpcs.gui.TradeMenuGUI;
 import org.samo_lego.tradernpcs.item.SearchableInventory;
 import org.samo_lego.tradernpcs.mixin.MerchantOfferAccessor;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import static org.samo_lego.tradernpcs.Traders.MOD_ID;
@@ -56,6 +60,15 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         if (this.ownerUUID == null) {
             this.setOwner();
         }
+
+        ListTag invTag = (ListTag) tag.get("Inventory");
+        if (invTag != null) {
+            LinkedList<ItemStack> itemStacks = new LinkedList<>();
+            for (Tag itemTag : invTag) {
+                itemStacks.add(ItemStack.of((CompoundTag) itemTag));
+            }
+            this.inventory.setFromArray(itemStacks);
+        }
     }
 
     @Override
@@ -64,20 +77,25 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         tag.putUUID("OwnerUUID", this.ownerUUID);
 
         // Serialize inventory
-        CompoundTag invTag = new CompoundTag();
-        invTag.putInt("Size", this.inventory.size());
+        ListTag invTag = new ListTag();
+        ArrayList<ItemStack> itemStacks = this.inventory.toArray();
+        for (ItemStack itemStack : itemStacks) {
+            invTag.add(itemStack.save(new CompoundTag()));
+        }
+        tag.put("Inventory", invTag);
     }
 
     @Override
     public void addTrade(ItemStack tradeStack1, ItemStack tradeStack2, ItemStack sellStack) {
         if (!tradeStack1.isEmpty() || !tradeStack2.isEmpty() || !sellStack.isEmpty()) {
-            int count = Math.max(sellStack.getCount(), 1);
+            int count = sellStack.getCount();
+            int maxUses = count == 0 ? 0 : this.inventory.getCommonStackSize(sellStack) / count;
             this.trades.add(
                     new MerchantOffer(
                             tradeStack1.copy(),
                             tradeStack2.copy(),
                             sellStack.copy(),
-                            this.inventory.getCommonStackSize(sellStack) / count,
+                            maxUses,
                             0,
                             0
                     )
@@ -87,15 +105,14 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
 
     @Override
     public MerchantOffers getTrades() {
-        if (this.itemsAdded) {
+        if (this.itemsAdded) {  //todo still a bit funky
             for (MerchantOffer offer : this.trades) {
-                // Check stock
+                // Update stock data
                 ItemStack result = offer.getResult();
-                if (!result.isEmpty()) {
-                    int maxTrades = this.inventory.getCommonStackSize(result) / result.getCount();
-                    ((MerchantOfferAccessor) offer).setMaxUses(maxTrades);
-                    offer.resetUses();
-                }
+                int count = result.getCount();
+                int maxUses = count == 0 ? 0 : this.inventory.getCommonStackSize(result) / count;
+                ((MerchantOfferAccessor) offer).setMaxUses(maxUses);
+                offer.resetUses();
             }
             this.itemsAdded = false;
         }
@@ -121,37 +138,42 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         ItemStack outputStack = offer.getResult();
         ItemStack stockStack = this.inventory.getSmallestSimilarStack(outputStack);
 
-        final boolean hasStock = !stockStack.isEmpty();
-        if (hasStock) {
-            // Update stock //todo - fix updating (cannot trade last item), stock gets merged over 64
-            this.inventory.decreaseStack(outputStack, stockStack);
+        // Update stock
+        this.inventory.decreaseStack(outputStack, stockStack);
 
-            int leftover = this.inventory.getCommonStackSize(outputStack);
-            ((MerchantOfferAccessor) offer).setMaxUses(leftover / outputStack.getCount());
-            offer.resetUses();
-            System.out.println("Leftover: " + leftover + ", size: " + outputStack.getCount());
+        int leftover = this.inventory.getCommonStackSize(outputStack);
+        int maxTrades = leftover / outputStack.getCount();
 
-            ItemStack paymentA = offer.getBaseCostA();
-            ItemStack paymentB = offer.getCostB();
-
-            // Add payment to inventory if not empty
-            this.inventory.addStack(paymentA);
-            this.inventory.addStack(paymentB);
+        // Ugly workaround, fixme
+        // For some reason, the offer is not allowed to be traded when the stock is set to 1 in this case?
+        if (maxTrades == 1) {
+            ((MerchantOfferAccessor) offer).setMaxUses(2);
+        } else {
+            ((MerchantOfferAccessor) offer).setMaxUses(maxTrades);
         }
+        offer.resetUses();
+
+        ItemStack paymentA = offer.getBaseCostA();
+        ItemStack paymentB = offer.getCostB();
+
+        // Add payment to inventory
+        this.inventory.addStack(paymentA);
+        this.inventory.addStack(paymentB);
     }
 
     @Override
     public boolean mayTrade(Player player, MerchantOffer offer) {
         ItemStack outputStack = offer.getResult();
-        ItemStack stockStack = this.inventory.getSmallestSimilarStack(outputStack);
+        int stockCount = this.inventory.getCommonStackSize(outputStack);
 
-        return outputStack.getCount() <= stockStack.getCount();
+        return outputStack.getCount() <= stockCount;
     }
 
     public SearchableInventory getInventoryItems() {
         return this.inventory;
     }
 
+    @Override
     public void setDirty() {
         this.itemsAdded = true;
     }

@@ -66,7 +66,7 @@ public class SurvivalStockGUI extends SimpleGui implements Container {
     @Override
     public ItemStack removeItemNoUpdate(int i) {
         if (i < this.items.size()) {
-            this.profession.setDirty();
+            this.setChanged();
             return this.items.remove(i);
         }
         return ItemStack.EMPTY;
@@ -75,19 +75,22 @@ public class SurvivalStockGUI extends SimpleGui implements Container {
 
     @Override
     public void setItem(int i, ItemStack itemStack) {
-        this.profession.setDirty();
-        if (i < this.items.size()) {
-            if (itemStack.isEmpty())
-                this.items.remove(i);
-            else
-                this.items.set(i, itemStack);
-        } else {
-            this.items.add(itemStack);
+        if (!itemStack.isEmpty()) {
+            this.setChanged();
+            if (i < this.items.size()) {
+                if (itemStack.isEmpty())
+                    this.items.remove(i);
+                else
+                    this.items.set(i, itemStack);
+            } else {
+                this.items.add(itemStack);
+            }
         }
     }
 
     @Override
     public void setChanged() {
+        this.profession.setDirty();
     }
 
     @Override
