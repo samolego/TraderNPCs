@@ -1,7 +1,8 @@
-package org.samo_lego.tradernpcs.gui;
+package org.samo_lego.tradernpcs.gui.slot;
 
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.samo_lego.tradernpcs.gui.TradeEditGUI;
 
 public class TradeSlot extends Slot {
     public TradeSlot(TradeEditGUI container, int ix) {

@@ -7,9 +7,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.samo_lego.tradernpcs.item.SearchableInventory;
 import org.samo_lego.tradernpcs.profession.SurvivalTraderProfession;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class SurvivalStockGUI extends SimpleGui implements Container {
     private final ArrayList<ItemStack> items;
@@ -22,13 +24,29 @@ public class SurvivalStockGUI extends SimpleGui implements Container {
      */
     public SurvivalStockGUI(SurvivalTraderProfession profession, ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
-        this.items = profession.getInventoryItems();
+
+        this.items = new ArrayList<>();
+        SearchableInventory inventoryItems = profession.getInventoryItems();
+
+        // Set items
+        for (LinkedList<ItemStack> itemList : inventoryItems.values()) {
+            this.items.addAll(itemList);
+        }
+
         this.profession = profession;
 
         // Redirect slots
         for (int i = 0; i < this.getSize(); i++) {
             this.setSlotRedirect(i, new Slot(this, i, 0, 0));
         }
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+
+        // Save items back to profession
+        this.profession.getInventoryItems().setFromArray(this.items);
     }
 
     @Override
