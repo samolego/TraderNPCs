@@ -3,44 +3,49 @@ package org.samo_lego.tradernpcs.item;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemList> {
-
+public final class SearchableInventory extends HashMap<Item, SearchableInventory.ItemList> {
 
     public SearchableInventory(int capacity) {
         super(capacity);
     }
 
     /**
-     * Puts payment stack into inventory or increases existing stack's count. Empty safe.
-     * @param payment payment stack to add.
+     * Puts stack into inventory or increases existing stack's count. Empty safe.
+     * @param stack stack stack to add.
      */
-    public void addStack(ItemStack payment) {
-        if (payment.isEmpty())
+    public void addStack(ItemStack stack) {
+        if (stack.isEmpty())
             return;
 
-        ItemStack paymentStack = this.getSimilarStack(payment);
+        ItemStack existingStack = this.getSmallestSimilarStack(stack);
 
-        if (paymentStack.isEmpty()) {
+        ItemStack copy = stack.copy();
+        if (existingStack.isEmpty()) {
             // Not yet in inventory
             ItemList itemStacks = new ItemList();
-            boolean add = itemStacks.add(payment.copy());
+            boolean add = itemStacks.add(copy);
 
             // Don't add if empty
             if (add)
-                this.put(payment.getItem(), itemStacks);
+                this.put(stack.getItem(), itemStacks);
         } else {
-            int count = paymentStack.getCount();
+            int count = stack.getCount();
+            int newCount = existingStack.getCount() + count;
+            int maxStackSize = stack.getMaxStackSize();
 
-            if (count < payment.getMaxStackSize()) {
-                // Just increase stack size
-                paymentStack.grow(payment.getCount());
+            if (newCount < maxStackSize) {
+                // Just increase stack size to limit
+                existingStack.grow(count);
             } else {
                 // New stack is needed to not overflow
-                this.get(payment.getItem()).add(payment.copy());
+                existingStack.setCount(maxStackSize);
+                copy.setCount(newCount - maxStackSize);
+                this.get(stack.getItem()).add(copy);
             }
         }
     }
@@ -48,9 +53,10 @@ public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemL
     /**
      * Decreases similar stack count by size of provided stack.
      * @param stack the stack to look similar stacks for and decrease their count.
+     * @param similarStack pointer to similar stack.
      */
-    public void decreaseStack(ItemStack stack) {
-        this.decreaseStack(stack, stack.getCount());
+    public void decreaseStack(ItemStack stack, ItemStack similarStack) {
+        this.decreaseStack(stack, stack.getCount(), similarStack);
     }
 
     /**
@@ -59,17 +65,26 @@ public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemL
      * @param count the amount to decrease.
      */
     public void decreaseStack(ItemStack stack, int count) {
-        ItemStack paymentStack = this.getSimilarStack(stack);
+        ItemStack similarStack = this.getSmallestSimilarStack(stack);
+        this.decreaseStack(stack, count, similarStack);
+    }
 
-        if (!paymentStack.isEmpty()) {
-            if (paymentStack.getCount() <= count) {
+    /**
+     * Decreases similar stack count by given amount.
+     * @param stack the stack to look similar stacks for and decrease their count.
+     * @param count the amount to decrease.
+     * @param similarStack pointer to similar stack.
+     */
+    public void decreaseStack(ItemStack stack, int count, ItemStack similarStack) {
+        if (!similarStack.isEmpty()) {
+            if (similarStack.getCount() <= count) {
                 // Remove stack
-                this.get(paymentStack.getItem()).remove(paymentStack);
+                this.get(similarStack.getItem()).remove(similarStack);
 
                 // Recursive for next stack
-                this.decreaseStack(stack, count - paymentStack.getCount());
+                this.decreaseStack(stack, count - similarStack.getCount());
             } else {
-                paymentStack.shrink(count);
+                similarStack.shrink(count);
             }
         }
     }
@@ -103,11 +118,11 @@ public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemL
     }
 
     /**
-     * Gets an itemstack that has same NBT as the given stack, ignoring count.
+     * Gets an itemstack with the lowest count that has same NBT as the given stack, ignoring count.
      * @param result the stack to get similar stack for.
      * @return the saved itemstack if found, otherwise empty.
      */
-    public ItemStack getSimilarStack(ItemStack result) {
+    public ItemStack getSmallestSimilarStack(ItemStack result) {
         LinkedList<ItemStack> potentialStock = this.getOrDefault(result.getItem(), null);
 
         // No item
@@ -116,15 +131,16 @@ public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemL
 
         // Check potential stock, we must take item count into account
         // and make sure that NBT is equal
+        ItemStack foundStack = ItemStack.EMPTY;
         for (ItemStack stockStack : potentialStock) {
             assert !stockStack.isEmpty();
-            if (areSimilar(stockStack, result)) {
-                // Item is the same, increase stock
-                return stockStack;
+            if (areSimilar(stockStack, result) && (stockStack.getCount() < foundStack.getCount() || foundStack == ItemStack.EMPTY)) {
+                // Item is the same
+                foundStack = stockStack;
             }
         }
 
-        return ItemStack.EMPTY;
+        return foundStack;
     }
 
     /**
@@ -152,6 +168,20 @@ public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemL
         }
     }
 
+    /**
+     * Returns array of all items in this inventory.
+     * @return array of all items in this inventory.
+     */
+    public ArrayList<ItemStack> toArray() {
+        ArrayList<ItemStack> items = new ArrayList<>();
+        // Set items
+        for (LinkedList<ItemStack> itemList : this.values()) {
+            items.addAll(itemList);
+        }
+
+        return items;
+    }
+
     static class ItemList extends LinkedList<ItemStack> {
         @Override
         public boolean add(ItemStack stack) {
@@ -161,6 +191,3 @@ public class SearchableInventory extends HashMap<Item, SearchableInventory.ItemL
         }
     }
 }
-
-
-

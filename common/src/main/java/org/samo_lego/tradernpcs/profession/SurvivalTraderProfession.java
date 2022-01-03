@@ -111,7 +111,7 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
             ServerPlayer owner = playersIt.next();
             this.ownerUUID = owner.getUUID();
 
-            // Todo
+            // Todo - better implementation once Taterzens gets better lang support
             owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your new survival trader!"), this.npc.getUUID());
         }
     }
@@ -119,15 +119,17 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
     @Override
     public void onTrade(MerchantOffer offer) {
         ItemStack outputStack = offer.getResult();
-        ItemStack stockStack = this.inventory.getSimilarStack(outputStack);
+        ItemStack stockStack = this.inventory.getSmallestSimilarStack(outputStack);
 
         final boolean hasStock = !stockStack.isEmpty();
         if (hasStock) {
-            // Update stock //todo - fix updating (cannot trade last item)
-            this.inventory.decreaseStack(outputStack);
+            // Update stock //todo - fix updating (cannot trade last item), stock gets merged over 64
+            this.inventory.decreaseStack(outputStack, stockStack);
+
             int leftover = this.inventory.getCommonStackSize(outputStack);
-            offer.resetUses();
             ((MerchantOfferAccessor) offer).setMaxUses(leftover / outputStack.getCount());
+            offer.resetUses();
+            System.out.println("Leftover: " + leftover + ", size: " + outputStack.getCount());
 
             ItemStack paymentA = offer.getBaseCostA();
             ItemStack paymentB = offer.getCostB();
@@ -136,6 +138,14 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
             this.inventory.addStack(paymentA);
             this.inventory.addStack(paymentB);
         }
+    }
+
+    @Override
+    public boolean mayTrade(Player player, MerchantOffer offer) {
+        ItemStack outputStack = offer.getResult();
+        ItemStack stockStack = this.inventory.getSmallestSimilarStack(outputStack);
+
+        return outputStack.getCount() <= stockStack.getCount();
     }
 
     public SearchableInventory getInventoryItems() {

@@ -23,9 +23,16 @@ public class OutputSlot extends VirtualTradeOutputSlot {
     }
 
     @Override
+    public boolean mayPickup(Player player) {
+        MerchantOffer activeOffer = this.merchantInventory.getActiveOffer();
+        return this.profession.mayTrade(player, activeOffer) && super.mayPickup(player);
+    }
+
+    @Override
     public void onTake(Player player, ItemStack itemStack) {
         MerchantOffer tradeOffer = this.merchantInventory.getActiveOffer();
         this.profession.onTrade(tradeOffer);
+
         super.onTake(player, itemStack);
         this.tradeGUI.sendUpdate();  //todo needed?
     }

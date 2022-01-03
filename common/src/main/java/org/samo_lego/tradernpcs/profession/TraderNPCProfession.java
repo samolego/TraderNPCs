@@ -85,4 +85,14 @@ public class TraderNPCProfession extends AbstractProfession {
      */
     public void onTrade(MerchantOffer tradeOffer) {
     }
+
+    /**
+     * Whether this player is allowed to trade with this npc.
+     * @param player the player.
+     * @param offer the offer being traded.
+     * @return true if allowed, false if not.
+     */
+    public boolean mayTrade(Player player, MerchantOffer offer) {
+        return true;
+    }
 }
