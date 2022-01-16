@@ -129,7 +129,7 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
             this.ownerUUID = owner.getUUID();
 
             // Todo - better implementation once Taterzens gets better lang support
-            owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your new survival trader!"), this.npc.getUUID());
+            owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your survival trader!"), this.npc.getUUID());
         }
     }
 
