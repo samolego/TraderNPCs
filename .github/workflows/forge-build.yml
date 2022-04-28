@@ -4,7 +4,9 @@
 # against bad commits.
 
 name: Forge Build
-on: [pull_request, push]
+on:
+  workflow_dispatch:
+
 
 jobs:
   build:
