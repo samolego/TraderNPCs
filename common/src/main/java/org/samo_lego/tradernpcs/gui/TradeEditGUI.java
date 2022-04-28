@@ -8,7 +8,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import org.jetbrains.annotations.Nullable;
-import org.samo_lego.taterzens.gui.ListItemsGUI;
+import org.samo_lego.taterzens.fabric.gui.ListItemsGUI;
 import org.samo_lego.tradernpcs.gui.slot.TradeSlot;
 import org.samo_lego.tradernpcs.mixin.MerchantOfferAccessor;
 import org.samo_lego.tradernpcs.profession.TraderNPCProfession;

@@ -23,8 +23,8 @@
   "mixins": ["tradernpcs-common.mixins.json"],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.17.1",
-    "taterzens": ">=1.6.1"
+    "minecraft": ">=1.18.2",
+    "taterzens": ">=1.9.0"
   },
   "recommends": {
     "taterzens": ">=${taterzens}"
