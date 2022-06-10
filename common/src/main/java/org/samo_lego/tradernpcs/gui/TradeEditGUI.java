@@ -1,6 +1,6 @@
 package org.samo_lego.tradernpcs.gui;
 
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -8,7 +8,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import org.jetbrains.annotations.Nullable;
-import org.samo_lego.taterzens.fabric.gui.ListItemsGUI;
+import org.samo_lego.taterzens.gui.ListItemsGUI;
 import org.samo_lego.tradernpcs.gui.slot.TradeSlot;
 import org.samo_lego.tradernpcs.mixin.MerchantOfferAccessor;
 import org.samo_lego.tradernpcs.profession.TraderNPCProfession;
@@ -46,11 +46,11 @@ public class TradeEditGUI extends ListItemsGUI {
 
         final ItemStack pane = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
         pane.setTag(customData.copy());
-        pane.setHoverName(TextComponent.EMPTY);
+        pane.setHoverName(Component.literal(""));
 
         final ItemStack tradeFor = new ItemStack(Items.SPECTRAL_ARROW);
         tradeFor.setTag(customData.copy());
-        tradeFor.setHoverName(new TextComponent("->"));
+        tradeFor.setHoverName(Component.literal("->"));
 
         // GUI skeleton
         for (i = 9; i + 8 < this.getSize(); i += 9) {

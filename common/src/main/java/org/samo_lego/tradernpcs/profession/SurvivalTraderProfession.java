@@ -3,7 +3,7 @@ package org.samo_lego.tradernpcs.profession;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -129,7 +129,7 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
             this.ownerUUID = owner.getUUID();
 
             // Todo - better implementation once Taterzens gets better lang support
-            owner.sendMessage(new TextComponent(owner.getGameProfile().getName() + ", I'm your survival trader!"), this.npc.getUUID());
+            owner.sendSystemMessage(Component.literal(owner.getGameProfile().getName() + ", I'm your survival trader!"));
         }
     }
 

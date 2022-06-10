@@ -1,7 +1,7 @@
 package org.samo_lego.tradernpcs.fabric;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import org.samo_lego.tradernpcs.Traders;
 
 public class TradersFabric implements ModInitializer {
@@ -9,6 +9,6 @@ public class TradersFabric implements ModInitializer {
     public void onInitialize() {
         Traders.init();
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Traders.registerCommands());
+        CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> Traders.registerCommands());
     }
 }

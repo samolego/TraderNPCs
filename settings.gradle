@@ -9,6 +9,8 @@ pluginManagement {
 
 include("common")
 include("fabric")
-//include("forge")
+if (forge_enabled.toBoolean()) {
+    include("forge")
+}
 
 rootProject.name = "tradernpcs"
