@@ -47,7 +47,6 @@ public class SurvivalTraderProfession extends TraderNPCProfession {
         }
         if (!player.isShiftKeyDown()) {
             new TradeGUI(this, (ServerPlayer) player).open();
-            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
