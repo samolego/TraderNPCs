@@ -29,7 +29,6 @@ public class TraderNPCProfession extends AbstractProfession {
     public InteractionResult interactAt(Player player, Vec3 pos, InteractionHand hand) {
         if (!player.isShiftKeyDown()) {
             new TradeGUI(this, (ServerPlayer) player).open();
-            return InteractionResult.FAIL;
         }
         return InteractionResult.PASS;
     }
